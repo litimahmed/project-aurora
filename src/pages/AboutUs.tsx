@@ -1,16 +1,47 @@
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { ArrowLeft, Target, Eye, Award, Users } from "lucide-react";
+import { ArrowLeft, Target, Eye, Award, Users, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/contexts/TranslationContext";
 import { useAboutUs } from "@/hooks/useAboutUs";
+import { useContactInfo } from "@/hooks/useContactInfo";
 
 const AboutUs = () => {
   const { t } = useTranslation();
-  const { data: apiData, isLoading } = useAboutUs();
+  const { data: apiData, isLoading, error } = useAboutUs();
+  const { data: contactData } = useContactInfo();
   
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !apiData) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <p className="text-muted-foreground mb-4">{t('aboutPage.errorLoading')}</p>
+            <Link to="/">
+              <Button variant="outline">{t('aboutPage.backToHome')}</Button>
+            </Link>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -29,12 +60,14 @@ const AboutUs = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              {apiData?.titre || t('aboutPage.title')}
-            </h1>
+            {apiData.titre && (
+              <h1 className="text-4xl md:text-5xl font-bold mb-6">
+                {apiData.titre}
+              </h1>
+            )}
             
             <div className="space-y-12">
-              {apiData?.contenu && (
+              {apiData.contenu && (
                 <section>
                   <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
                     {apiData.contenu}
@@ -42,7 +75,7 @@ const AboutUs = () => {
                 </section>
               )}
 
-              {apiData?.mission && (
+              {apiData.mission && (
                 <section>
                   <div className="flex items-start gap-4 mb-4">
                     <div className="p-3 rounded-lg bg-primary/10">
@@ -58,7 +91,7 @@ const AboutUs = () => {
                 </section>
               )}
 
-              {apiData?.vision && (
+              {apiData.vision && (
                 <section>
                   <div className="flex items-start gap-4 mb-4">
                     <div className="p-3 rounded-lg bg-primary/10">
@@ -74,7 +107,7 @@ const AboutUs = () => {
                 </section>
               )}
 
-              {apiData?.valeurs && (
+              {apiData.valeurs && (
                 <section>
                   <div className="flex items-start gap-4 mb-4">
                     <div className="p-3 rounded-lg bg-primary/10">
@@ -90,7 +123,7 @@ const AboutUs = () => {
                 </section>
               )}
 
-              {apiData?.qui_nous_servons && (
+              {apiData.qui_nous_servons && (
                 <section>
                   <div className="flex items-start gap-4 mb-4">
                     <div className="p-3 rounded-lg bg-primary/10">
@@ -106,7 +139,7 @@ const AboutUs = () => {
                 </section>
               )}
 
-              {apiData?.pourquoi_choisir_nous && (
+              {apiData.pourquoi_choisir_nous && (
                 <section className="pt-8 border-t border-border">
                   <h2 className="text-2xl font-semibold mb-4">{t('aboutPage.whyChooseTitle')}</h2>
                   <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
@@ -115,17 +148,21 @@ const AboutUs = () => {
                 </section>
               )}
 
-              <section className="pt-8 border-t border-border">
-                <h2 className="text-2xl font-semibold mb-4">{t('aboutPage.getInTouchTitle')}</h2>
-                <p className="text-muted-foreground leading-relaxed mb-4">
-                  {t('aboutPage.getInTouchText')}
-                </p>
-                <div className="space-y-2 text-muted-foreground">
-                  <p>{t('aboutPage.email')}</p>
-                  <p>{t('aboutPage.phone')}</p>
-                  <p>{t('aboutPage.address')}</p>
-                </div>
-              </section>
+              {contactData && (contactData.email || contactData.telephone || contactData.adresse) && (
+                <section className="pt-8 border-t border-border">
+                  <h2 className="text-2xl font-semibold mb-4">{t('aboutPage.getInTouchTitle')}</h2>
+                  <p className="text-muted-foreground leading-relaxed mb-4">
+                    {t('aboutPage.getInTouchText')}
+                  </p>
+                  <div className="space-y-2 text-muted-foreground">
+                    {contactData.email && <p>{contactData.email}</p>}
+                    {contactData.telephone && <p>{contactData.telephone}</p>}
+                    {contactData.adresse && (
+                      <p>{[contactData.adresse, contactData.ville, contactData.wilaya].filter(Boolean).join(', ')}</p>
+                    )}
+                  </div>
+                </section>
+              )}
             </div>
           </motion.div>
         </div>

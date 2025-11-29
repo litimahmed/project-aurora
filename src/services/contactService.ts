@@ -16,4 +16,3 @@ export const contactService = {
     return apiClient.post('/admins/contacte/ajouter/', formData);
   },
 };
- 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, Clock, ArrowLeft, Send, Globe } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, ArrowLeft, Send, Globe, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,7 @@ import { contactService } from "@/services/contactService";
 
 const ContactUsPage = () => {
   const { t, language } = useTranslation();
-  const { data: apiData } = useContactInfo();
+  const { data: apiData, isLoading, error } = useContactInfo();
   
   const [formData, setFormData] = useState({
     name: "",
@@ -24,33 +24,6 @@ const ContactUsPage = () => {
     subject: "",
     message: "",
   });
-
-  const contactInfo = [
-    {
-      icon: Mail,
-      title: t("contact.email"),
-      value: apiData?.email || "contact@toorrii.com",
-      color: "text-primary",
-    },
-    {
-      icon: Phone,
-      title: t("contact.phone"),
-      value: apiData?.telephone || "+213 (0) 123 456 789",
-      color: "text-secondary",
-    },
-    {
-      icon: MapPin,
-      title: t("contact.location"),
-      value: apiData?.adresse ? `${apiData.adresse}, ${apiData.ville}, ${apiData.wilaya}` : "Algiers, Algeria",
-      color: "text-primary",
-    },
-    {
-      icon: Clock,
-      title: t("contact.hours"),
-      value: apiData?.horaires || t("contact.hoursValue"),
-      color: "text-secondary",
-    },
-  ];
 
   const mutation = useMutation({
     mutationFn: contactService.sendContactMessage,
@@ -73,6 +46,62 @@ const ContactUsPage = () => {
   ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+        <Header />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !apiData) {
+    return (
+      <div className="min-h-screen bg-background" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+        <Header />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <p className="text-muted-foreground mb-4">{t('contact.errorLoading')}</p>
+            <Link to="/">
+              <Button variant="outline">{t('aboutPage.backToHome')}</Button>
+            </Link>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  const contactInfo = [
+    apiData.email && {
+      icon: Mail,
+      title: t("contact.email"),
+      value: apiData.email,
+      color: "text-primary",
+    },
+    apiData.telephone && {
+      icon: Phone,
+      title: t("contact.phone"),
+      value: apiData.telephone,
+      color: "text-secondary",
+    },
+    (apiData.adresse || apiData.ville || apiData.wilaya) && {
+      icon: MapPin,
+      title: t("contact.location"),
+      value: [apiData.adresse, apiData.ville, apiData.wilaya].filter(Boolean).join(', '),
+      color: "text-primary",
+    },
+    apiData.horaires && {
+      icon: Clock,
+      title: t("contact.hours"),
+      value: apiData.horaires,
+      color: "text-secondary",
+    },
+  ].filter(Boolean) as { icon: any; title: string; value: string; color: string }[];
 
   return (
     <div className="min-h-screen bg-background" dir={language === 'ar' ? 'rtl' : 'ltr'}>
@@ -103,35 +132,39 @@ const ContactUsPage = () => {
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               {t("contact.title")}
             </h1>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              {apiData?.message_acceuil || t("contact.subtitle")}
-            </p>
+            {apiData.message_acceuil && (
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                {apiData.message_acceuil}
+              </p>
+            )}
           </motion.div>
 
           {/* Contact Info Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-            {contactInfo.map((info, index) => (
-              <motion.div
-                key={info.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card className="h-full hover:shadow-card transition-shadow">
-                  <CardContent className="pt-6 text-center">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                      <info.icon className={`w-6 h-6 ${info.color}`} />
-                    </div>
-                    <h3 className="font-semibold mb-2">{info.title}</h3>
-                    <p className="text-sm text-muted-foreground">{info.value}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
+          {contactInfo.length > 0 && (
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+              {contactInfo.map((info, index) => (
+                <motion.div
+                  key={info.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card className="h-full hover:shadow-card transition-shadow">
+                    <CardContent className="pt-6 text-center">
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                        <info.icon className={`w-6 h-6 ${info.color}`} />
+                      </div>
+                      <h3 className="font-semibold mb-2">{info.title}</h3>
+                      <p className="text-sm text-muted-foreground">{info.value}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          )}
 
           {/* Website & Social Links */}
-          {(apiData?.site_web || apiData?.facebook || apiData?.instagram || apiData?.tiktok || apiData?.linkedin || apiData?.x) && (
+          {(apiData.site_web || apiData.facebook || apiData.instagram || apiData.tiktok || apiData.linkedin || apiData.x) && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

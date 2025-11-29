@@ -7,6 +7,6 @@ export const useTermsOfService = () => {
     queryKey: ['termsOfService'],
     queryFn: termsOfServiceService.getTermsOfService,
     retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 };
