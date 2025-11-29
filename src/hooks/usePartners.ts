@@ -7,7 +7,7 @@ export const usePartners = () => {
     queryKey: ['partners'],
     queryFn: partnerService.getPartners,
     retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 };
 
@@ -16,7 +16,7 @@ export const usePartner = (id: string) => {
     queryKey: ['partner', id],
     queryFn: () => partnerService.getPartnerById(id),
     retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
     enabled: !!id,
   });
 };
