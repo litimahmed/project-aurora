@@ -1,0 +1,164 @@
+/**
+ * @file TermsOfService.tsx
+ * @description Full Terms of Service page with detailed terms and conditions.
+ */
+
+import { motion } from "framer-motion";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { useTranslation } from "@/contexts/TranslationContext";
+import { FileText, Scale, Shield, AlertCircle } from "lucide-react";
+import { useTermsOfService } from "@/hooks/useTermsOfService";
+
+const TermsOfService = () => {
+  const { t } = useTranslation();
+  const { data: termsData } = useTermsOfService();
+
+  const sections = [
+    {
+      icon: FileText,
+      title: t("terms.acceptance.title"),
+      content: t("terms.acceptance.content")
+    },
+    {
+      icon: Scale,
+      title: t("terms.userRights.title"),
+      content: t("terms.userRights.content")
+    },
+    {
+      icon: Shield,
+      title: t("terms.limitations.title"),
+      content: t("terms.limitations.content")
+    },
+    {
+      icon: AlertCircle,
+      title: t("terms.termination.title"),
+      content: t("terms.termination.content")
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      {/* Hero Section */}
+      <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-primary/5 to-background">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center"
+          >
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary/10 mb-6">
+              <FileText className="w-10 h-10 text-primary" />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              {termsData?.titre || t("terms.title")}
+            </h1>
+            <p className="text-xl text-muted-foreground mb-4">
+              {t("terms.subtitle")}
+            </p>
+            {termsData?.version && (
+              <p className="text-sm text-muted-foreground">
+                {t("terms.lastUpdated")} - Version {termsData.version}
+              </p>
+            )}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Introduction */}
+          {termsData?.contenu && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mb-12 p-8 bg-card border border-border rounded-2xl"
+            >
+              <div className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                {termsData.contenu}
+              </div>
+            </motion.div>
+          )}
+          
+          {!termsData?.contenu && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mb-12 p-8 bg-card border border-border rounded-2xl"
+            >
+              <h2 className="text-2xl font-bold mb-4">{t("terms.introduction.title")}</h2>
+              <p className="text-muted-foreground leading-relaxed">
+                {t("terms.introduction.content")}
+              </p>
+            </motion.div>
+          )}
+
+          {/* Main Sections */}
+          <div className="space-y-8">
+            {sections.map((section, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 * index }}
+                className="p-8 bg-card border border-border rounded-2xl hover:border-primary/50 transition-colors"
+              >
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <section.icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold mb-3">{section.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                      {section.content}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Additional Terms */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="mt-12 p-8 bg-gradient-to-br from-primary/5 to-transparent border border-border rounded-2xl"
+          >
+            <h2 className="text-2xl font-bold mb-6">{t("terms.additional.title")}</h2>
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-2">{t("terms.additional.modifications")}</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {t("terms.additional.modificationsContent")}
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">{t("terms.additional.governing")}</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {t("terms.additional.governingContent")}
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">{t("terms.additional.contact")}</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {t("terms.additional.contactContent")}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default TermsOfService;
